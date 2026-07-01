@@ -33,11 +33,11 @@ server = app.server  # Required for Render deployment
 
 # FPA Weight Table (Albrecht, 1979)
 FPA_WEIGHTS = {
-    "External Inputs": {"Simple": 3, "Average": 4, "Complex": 6},
-    "External Outputs": {"Simple": 4, "Average": 5, "Complex": 7},
-    "External Inquiries": {"Simple": 3, "Average": 4, "Complex": 6},
-    "Internal Logical Files": {"Simple": 7, "Average": 10, "Complex": 15},
-    "External Interface Files": {"Simple": 5, "Average": 7, "Complex": 10},
+    "External Inputs (EI)": {"Simple": 3, "Average": 4, "Complex": 6},
+    "External Outputs (EO)": {"Simple": 4, "Average": 5, "Complex": 7},
+    "External Inquiries (EQ)": {"Simple": 3, "Average": 4, "Complex": 6},
+    "Internal Logical Files (ILF)": {"Simple": 7, "Average": 10, "Complex": 15},
+    "External Interface Files (EIF)": {"Simple": 5, "Average": 7, "Complex": 10},
 }
 
 # 14 General System Characteristics
@@ -56,14 +56,24 @@ COCOMO_PARAMS = {
     "Embedded": {"a": 3.6, "b": 1.20, "c": 2.5, "d": 0.32},
 }
 
-# FP to LOC conversion ratios (industry averages, LOC per FP)
+# FP to LOC conversion ratios (Avg LOC per FP)
+# Sources: QSM SLOC/FP Table + Capers Jones (1996) for Python
 FP_TO_LOC = {
-    "Python": 53,
+    "Python (Capers Jones)": 53,
     "Java": 53,
     "JavaScript": 47,
     "C#": 54,
-    "C++": 64,
-    "SQL": 13,
+    "C++": 50,
+    "C": 97,
+    ".NET": 57,
+    "SQL": 21,
+    "HTML": 34,
+    "COBOL": 61,
+    "J2EE": 46,
+    "Visual Basic": 42,
+    "PL/SQL": 37,
+    "Oracle": 37,
+    "Perl": 24,
 }
 
 # ============================================================
@@ -91,11 +101,115 @@ app.index_string = '''
         <title>{%title%}</title>
         {%favicon%}
         {%css%}
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
         <style>
-            * { font-family: 'EB Garamond', serif !important; }
-            h1, h2, h3, h4, h5, h6 { font-family: 'EB Garamond', serif !important; font-weight: 600; }
-            .card-body h3 { font-size: 1.5rem; }
-            .nav-link { font-family: 'EB Garamond', serif !important; font-size: 1.05rem; }
+            /* LIGHT MODE — clean white with teal accents */
+            * { font-family: 'Inter', sans-serif !important; }
+            body { background-color: #f0f2f5 !important; color: #1a202c !important; }
+            .container-fluid { background-color: #f0f2f5 !important; }
+
+            /* Typography */
+            h1, h2, h3, h4, h5, h6 { font-family: 'Inter', sans-serif !important; font-weight: 700; color: #1a202c !important; }
+            h2 { font-size: 2.2rem !important; letter-spacing: -0.02em !important; }
+            h4 { font-size: 1.6rem !important; }
+            h5 { font-size: 1.15rem !important; text-transform: none !important; }
+            p, li, label, small { color: #4a5568 !important; }
+            .text-muted { color: #718096 !important; }
+            strong, b { color: #1a202c !important; }
+            a { color: #0d9488 !important; text-decoration: none !important; }
+            a:hover { color: #0f766e !important; text-decoration: underline !important; }
+
+            /* Cards — white with subtle shadow and teal top border */
+            .card { background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 12px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important; border-top: 3px solid #0d9488 !important; }
+            .card-body h3 { font-size: 1.5rem; font-weight: 800 !important; color: #0d9488 !important; }
+            .card-body h6 { color: #64748b !important; font-weight: 500 !important; font-size: 0.85rem !important; }
+
+            /* Tabs — clean pill style */
+            .nav-tabs { border-bottom: 1px solid #e2e8f0 !important; background-color: #ffffff !important; border-radius: 8px 8px 0 0 !important; padding: 4px !important; }
+            .nav-link { font-family: 'Inter', sans-serif !important; font-size: 0.9rem; color: #64748b !important; border: none !important; padding: 10px 18px !important; border-radius: 6px !important; }
+            .nav-link.active { color: #ffffff !important; background-color: #1a202c !important; font-weight: 600 !important; border-bottom: none !important; }
+            .nav-link:hover { color: #0d9488 !important; }
+
+            /* Tables — clean light style */
+            .table { color: #1a202c !important; background-color: #ffffff !important; border-color: #e2e8f0 !important; }
+            .table thead th { background-color: #f8fafc !important; color: #0d9488 !important; border-bottom: 2px solid #e2e8f0 !important; font-weight: 600 !important; }
+            .table td { border-color: #e2e8f0 !important; color: #334155 !important; background-color: #ffffff !important; }
+            .table-striped tbody tr:nth-of-type(odd) td { background-color: #ffffff !important; }
+            .table-striped tbody tr:nth-of-type(even) td { background-color: #ffffff !important; }
+            .table-striped > tbody > tr:nth-of-type(odd) > * { --bs-table-striped-bg: #ffffff !important; background-color: #ffffff !important; color: #334155 !important; }
+            .table-bordered { border-color: #e2e8f0 !important; }
+            .table-dark { --bs-table-bg: #ffffff !important; --bs-table-striped-bg: #ffffff !important; background-color: #ffffff !important; }
+            .table-dark td, .table-dark th { background-color: #ffffff !important; color: #1a202c !important; border-color: #e2e8f0 !important; --bs-table-bg: #ffffff !important; }
+            .table-dark thead th { background-color: #ffffff !important; color: #0d9488 !important; }
+            .table-dark.table-striped > tbody > tr:nth-of-type(odd) > * { --bs-table-striped-bg: #ffffff !important; background-color: #ffffff !important; color: #1a202c !important; }
+            .table > :not(caption) > * > * { background-color: #ffffff !important; }
+
+            /* Inputs & Dropdowns */
+            .form-control, input[type="number"] { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; color: #1a202c !important; border-radius: 8px !important; }
+            .form-control:focus, input:focus { border-color: #0d9488 !important; box-shadow: 0 0 0 2px rgba(13,148,136,0.15) !important; }
+
+            /* Buttons — teal primary */
+            .btn-primary { background-color: #0d9488 !important; border-color: #0d9488 !important; border-radius: 8px !important; padding: 12px 32px !important; font-weight: 600 !important; font-size: 1rem !important; color: #ffffff !important; }
+            .btn-primary:hover { background-color: #0f766e !important; box-shadow: 0 4px 12px rgba(13,148,136,0.25) !important; }
+            .btn-secondary { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #334155 !important; border-radius: 8px !important; font-weight: 600 !important; }
+            .btn-secondary:hover { background-color: #e2e8f0 !important; color: #1a202c !important; border-color: #0d9488 !important; }
+
+            /* Alerts */
+            .alert-success { background-color: #ecfdf5 !important; border: none !important; border-left: 4px solid #10b981 !important; color: #065f46 !important; border-radius: 6px !important; }
+            .alert-info { background-color: #eff6ff !important; border: none !important; border-left: 4px solid #3b82f6 !important; color: #1e40af !important; border-radius: 6px !important; }
+            .alert-warning { background-color: #fffbeb !important; border: none !important; border-left: 4px solid #f59e0b !important; color: #92400e !important; border-radius: 6px !important; }
+
+            /* Accordion */
+            .accordion-button { background-color: #f8fafc !important; color: #1a202c !important; border: 1px solid #e2e8f0 !important; border-radius: 6px !important; }
+            .accordion-button:not(.collapsed) { background-color: #ecfdf5 !important; color: #0d9488 !important; }
+            .accordion-body { background-color: #ffffff !important; color: #4a5568 !important; }
+            .accordion-item { border-color: #e2e8f0 !important; border-radius: 6px !important; margin-bottom: 4px !important; }
+
+            /* Sliders */
+            .rc-slider-track { background-color: #0d9488 !important; }
+            .rc-slider-handle { border-color: #0d9488 !important; background-color: #ffffff !important; }
+            .rc-slider-rail { background-color: #e2e8f0 !important; }
+            .rc-slider-mark-text { color: #64748b !important; }
+
+            /* Dropdown (Dash specific) */
+            .Select-control { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; }
+            .Select-menu-outer { background-color: #ffffff !important; border-color: #e2e8f0 !important; }
+            .Select-option { background-color: #ffffff !important; color: #1a202c !important; }
+            .Select-option.is-focused { background-color: #ecfdf5 !important; color: #0d9488 !important; }
+            .Select-value-label { color: #1a202c !important; }
+            .Select-placeholder { color: #94a3b8 !important; }
+            .Select-value { color: #1a202c !important; }
+            .Select-input input { color: #1a202c !important; }
+            .Select-arrow-zone { color: #64748b !important; }
+            .dash-dropdown .Select-control { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; }
+            .dash-dropdown .Select-value-label { color: #1a202c !important; }
+            .dash-dropdown .Select-menu-outer { background-color: #ffffff !important; }
+            .dash-dropdown .VirtualizedSelectOption { background-color: #ffffff !important; color: #1a202c !important; }
+            .dash-dropdown .VirtualizedSelectFocusedOption { background-color: #ecfdf5 !important; color: #0d9488 !important; }
+            div[class*="Select"] { background-color: transparent !important; }
+            .Select.is-focused > .Select-control { background-color: #ffffff !important; border-color: #0d9488 !important; }
+            .Select.has-value.Select--single > .Select-control { background-color: #ffffff !important; }
+            .Select.has-value.is-pseudo-focused.Select--single > .Select-control { background-color: #ffffff !important; }
+
+            /* Horizontal rules */
+            hr { border-color: #e2e8f0 !important; opacity: 0.6 !important; }
+
+            /* Footer */
+            .text-center.text-muted.small { color: #94a3b8 !important; }
+
+            /* UL/LI styling */
+            ul { padding-left: 1.2rem !important; }
+            li { margin-bottom: 0.4rem !important; }
+
+            /* Accordion body tables */
+            .accordion-body .table { background-color: #ffffff !important; }
+            .accordion-body .table td { background-color: #ffffff !important; color: #334155 !important; font-weight: 500 !important; }
+            .accordion-body .table thead th { background-color: #f8fafc !important; color: #0d9488 !important; }
+
+            /* Card tables — results */
+            .card .table td { background-color: #ffffff !important; color: #1a202c !important; }
+            .card .table td strong, .card .table td b { color: #0d9488 !important; font-weight: 700 !important; }
+            .card .table thead th { background-color: #f8fafc !important; color: #0d9488 !important; }
         </style>
     </head>
     <body>
@@ -133,6 +247,9 @@ app.layout = dbc.Container([
     dcc.Store(id="cocomo-store", storage_type="session"),
     dcc.Store(id="pert-store", storage_type="session"),
     dcc.Store(id="cost-store", storage_type="session"),
+    # Dynamic row count stores
+    dcc.Store(id="pert-row-count", data=5, storage_type="session"),
+    dcc.Store(id="cost-row-count", data=4, storage_type="session"),
 
     # Footer
     html.Hr(),
@@ -179,7 +296,7 @@ def render_fpa_tab():
             ), width=3),
             dbc.Col(dbc.Input(
                 id={"type": "fpa-count", "index": i},
-                type="number", value=5, min=0, max=200
+                type="number", value=5, min=0
             ), width=3),
         ], className="mb-2"))
 
@@ -212,11 +329,30 @@ def render_fpa_tab():
 
         # Complexity explanation under the table
         html.P([
-            html.Strong("Complexity"), " is determined by the number of data fields involved and how many internal files/tables the function references:", html.Br(),
-            "Simple = few fields, references 0-1 files.", html.Br(),
-            "Average = moderate fields, references 2 files.", html.Br(),
-            "Complex = many fields, references 3+ files."
+            html.Strong("Complexity"), " is determined by the number of data element types (DETs) and file types referenced (FTRs/RETs):"
         ], className="text-muted small mt-2"),
+        html.P([
+            html.Strong("Data Functions (ILF, EIF):"), html.Br(),
+            "1 record type → Low complexity", html.Br(),
+            "2-5 record types → Average complexity", html.Br(),
+            "6+ record types → High complexity"
+        ], className="text-muted small"),
+        html.P([
+            html.Strong("Transactional Functions (EI, EO, EQ):"), html.Br(),
+            "0-1 file types referenced → Low complexity", html.Br(),
+            "2 file types referenced → Average complexity", html.Br(),
+            "3+ file types referenced → High complexity"
+        ], className="text-muted small"),
+
+        # Weight explanation
+        html.P([
+            html.Strong("Weight"), " is a fixed value from the Albrecht standard weight table — NOT user-entered. ", html.Br(),
+            "The app automatically looks up the correct weight based on your Function Type + Complexity selection. ",
+            "These weights represent relative development effort derived from empirical research across hundreds of IBM projects (Albrecht, 1979). ",
+            html.A("View original source (IFPUG)", href="https://www.ifpug.org/standards/fpa/", target="_blank"),
+            " | ",
+            html.A("QSM Function Point reference", href="https://www.qsm.com/resources/function-point-languages-table", target="_blank"),
+        ], className="text-muted small"),
 
         # Count explanation
         html.P([
@@ -237,10 +373,15 @@ def render_fpa_tab():
         html.Hr(),
         html.H5("Calculation Logic", style={"fontSize": "1.3rem", "fontWeight": "700"}),
         html.P([
-            "1. For each function type: ", html.Strong("Weight"), " (from the Albrecht standard weight table — see below) × ", html.Strong("Count"), " = Contribution", html.Br(),
-            "2. Sum all contributions = ", html.Strong("Unadjusted Function Points (UFP)"), " — the raw size before environmental adjustment", html.Br(),
-            "3. Sum all 14 GSC ratings = ", html.Strong("Value Adjustment Factor (VAF)"), " — how complex the operating environment is", html.Br(),
-            "4. Final formula: ", html.Strong("Adjusted FP = UFP × (0.65 + 0.01 × VAF)"), " — the technology-independent project size"
+            html.Strong("Function Point (FP) = UFP × VAF"), html.Br(), html.Br(),
+            "1. For each function type: ", html.Strong("Contribution"), " = Count × Complexity Weight (from Albrecht standard table)", html.Br(),
+            "2. ", html.Strong("Unadjusted Function Points (UFP)"), " = Sum of all contributions (the raw project size)", html.Br(),
+            "3. ", html.Strong("Total Degree of Influence (TDI)"), " = Sum of all 14 GSC ratings (range: 0–70)", html.Br(),
+            "4. ", html.Strong("Value Adjustment Factor (VAF)"), " = 0.65 + (0.01 × TDI)  — range: 0.65–1.35", html.Br(),
+            "5. ", html.Strong("Adjusted FP"), " = UFP × VAF — the final technology-independent project size"
+        ], className="small"),
+        html.P([
+            html.A("View 14 GSC definitions (PDF)", href="https://www.jodypaul.com/SWE/FunctionPointAnalysisFundamentals.pdf", target="_blank"),
         ], className="small"),
 
         # Standard Weight Table Reference
@@ -282,7 +423,7 @@ def render_fpa_tab():
                 ], bordered=True, size="sm"),
                 html.P([
                     "If GSC sum = 42 (moderate complexity):", html.Br(),
-                    html.Strong("Adjusted FP = 51 × (0.65 + 0.01 × 42) = 51 × 1.07 = 54.6 Function Points")
+                    html.Strong("Adjusted FP = 51 × (0.65 + (0.01 × 42)) = 51 × 1.07 = 54.6 Function Points")
                 ], className="mt-2"),
             ], title="See Worked Example (Student Registration System)")
         ], start_collapsed=True, className="mb-3"),
@@ -315,21 +456,22 @@ def calculate_fpa(n_clicks, complexities, counts, gsc_values):
         ufp += contribution
         breakdown.append({"Function Type": ft, "Complexity": comp, "Count": count, "Weight": weight, "Contribution": contribution})
 
-    vaf = sum(v for v in gsc_values if v is not None)
-    adjusted_fp = round(ufp * (0.65 + 0.01 * vaf), 1)
+    tdi = sum(v for v in gsc_values if v is not None)
+    vaf = round(0.65 + 0.01 * tdi, 2)
+    adjusted_fp = round(ufp * vaf, 1)
 
-    result_data = {"ufp": ufp, "vaf": vaf, "adjusted_fp": adjusted_fp}
+    result_data = {"ufp": ufp, "vaf": tdi, "adjusted_fp": adjusted_fp}
 
     results = dbc.Card([
         dbc.CardBody([
             html.H5("Results", className="card-title"),
             dbc.Row([
                 dbc.Col(dbc.Card(dbc.CardBody([html.H6("Unadjusted Function Points (UFP)"), html.H3(str(ufp))])), width=4),
-                dbc.Col(dbc.Card(dbc.CardBody([html.H6("Value Adjustment Factor (VAF)"), html.H3(str(vaf))])), width=4),
+                dbc.Col(dbc.Card(dbc.CardBody([html.H6("Total Degree of Influence (TDI)"), html.H3(str(tdi))])), width=4),
                 dbc.Col(dbc.Card(dbc.CardBody([html.H6("Adjusted Function Points"), html.H3(str(adjusted_fp))])), width=4),
             ]),
-            html.P(f"Formula: {ufp} × (0.65 + 0.01 × {vaf}) = {adjusted_fp}", className="mt-3 text-muted"),
-            dbc.Alert(f"Your project is {adjusted_fp} Function Points. Proceed to COCOMO.", color="success")
+            html.P(f"TDI = {tdi}  →  VAF = 0.65 + (0.01 × {tdi}) = {vaf}", className="mt-2 text-muted"),
+            html.P([html.Strong(f"Adjusted FP = {ufp} × {vaf} = {adjusted_fp} Function Points")], className="mt-1"),
         ])
     ], className="mt-3")
 
@@ -344,39 +486,91 @@ def render_cocomo_tab():
     return html.Div([
         html.H4("COCOMO — Constructive Cost Model"),
         html.Ul([
-            html.Li([html.Strong("Definition: "), "Converts a project's estimated size into effort (person-months), duration (months), and recommended team size using empirically-derived parametric formulas."]),
-            html.Li([html.Strong("Use case: "), "When you have a size estimate (from FPA or KLOC) and need to forecast how many people, how long, and how much effort the project requires — supporting staffing and budget decisions."]),
+            html.Li([html.Strong("Definition: "), "An algorithmic software cost estimation model that predicts effort, cost, and schedule based on project size metrics (Boehm, 1981)."]),
+            html.Li([html.Strong("Use case: "), "When you have a size estimate (from FPA or KLOC) and need to forecast staffing, timeline, and budget — supporting resource allocation decisions."]),
         ], className="mb-3"),
+        # Project Classification Table
+        html.H5("Project Type Classification", style={"fontSize": "1.3rem", "fontWeight": "700"}),
+        dbc.Table([
+            html.Thead(html.Tr([html.Th("Aspect"), html.Th("Organic"), html.Th("Semi-Detached"), html.Th("Embedded")])),
+            html.Tbody([
+                html.Tr([html.Td(html.Strong("Project Size")), html.Td("2–50 KLOC"), html.Td("50–300 KLOC"), html.Td("300+ KLOC")]),
+                html.Tr([html.Td(html.Strong("Complexity")), html.Td("Low"), html.Td("Medium"), html.Td("High")]),
+                html.Tr([html.Td(html.Strong("Problem Understanding")), html.Td("Well-understood, previously solved"), html.Td("Somewhat understood, partial experience"), html.Td("High ambiguity, novel domain")]),
+                html.Tr([html.Td(html.Strong("Team Experience")), html.Td("Highly experienced team"), html.Td("Mixed — some experienced, some not"), html.Td("Specialised experts required")]),
+                html.Tr([html.Td(html.Strong("Environment")), html.Td("Flexible, few constraints"), html.Td("Moderate constraints"), html.Td("Highly rigorous, strict operational constraints")]),
+                html.Tr([html.Td(html.Strong("Example")), html.Td("Simple payroll system"), html.Td("New system interfacing with legacy"), html.Td("Flight control software")]),
+            ])
+        ], bordered=True, striped=True, size="sm", className="mb-3 table-dark"),
 
-        html.H5("Step 1: Project Size"),
+        # Coefficient Constants Table
+        html.H5("COCOMO Coefficient Constants (Boehm, 1981)", style={"fontSize": "1.3rem", "fontWeight": "700"}),
+        html.P([
+            "These constants were empirically derived from studying 63 real software projects. ",
+            "They determine how effort scales with project size for each type. ",
+            html.A("Source: GeeksforGeeks COCOMO", href="https://www.geeksforgeeks.org/software-engineering/software-engineering-cocomo-model/", target="_blank"),
+        ], className="text-muted small"),
+        dbc.Table([
+            html.Thead(html.Tr([html.Th("Project Type"), html.Th("a"), html.Th("b"), html.Th("c"), html.Th("d")])),
+            html.Tbody([
+                html.Tr([html.Td("Organic"), html.Td("2.4"), html.Td("1.05"), html.Td("2.5"), html.Td("0.38")]),
+                html.Tr([html.Td("Semi-Detached"), html.Td("3.0"), html.Td("1.12"), html.Td("2.5"), html.Td("0.35")]),
+                html.Tr([html.Td("Embedded"), html.Td("3.6"), html.Td("1.20"), html.Td("2.5"), html.Td("0.32")]),
+            ])
+        ], bordered=True, size="sm", className="mb-2 table-dark"),
+        html.P([
+            html.Strong("How constants work: "), html.Br(),
+            html.Strong("a"), " (effort multiplier): Higher for embedded projects → more effort per unit of code due to constraints.", html.Br(),
+            html.Strong("b"), " (effort exponent): >1 means effort grows faster than linearly with size — larger projects are disproportionately harder.", html.Br(),
+            html.Strong("c"), " (duration multiplier): Determines baseline calendar time.", html.Br(),
+            html.Strong("d"), " (duration exponent): <1 means adding more effort doesn't proportionally reduce duration (Brooks's Law).",
+        ], className="text-muted small"),
+
+        html.Hr(),
+        html.H5("Step 1: Project Size (KLOC)", style={"fontSize": "1.3rem", "fontWeight": "700"}),
+        html.P([
+            html.Strong("KLOC = FP × (LOC/FP) ÷ 1000"), html.Br(),
+            "Where LOC/FP is the industry-standard lines of code per function point for your chosen language.", html.Br(),
+            html.A("Full LOC/FP table for all languages (QSM)", href="https://www.qsm.com/resources/function-point-languages-table", target="_blank"),
+        ], className="text-muted small"),
         dbc.Row([
             dbc.Col([
                 html.Label("KLOC (thousands of lines of code)"),
                 dbc.Input(id="cocomo-kloc", type="number", value=10, min=0.1, step=0.5),
-                html.Small("Tip: If you completed FPA, use conversion: FP × LOC-per-FP ÷ 1000", className="text-muted")
             ], width=6),
             dbc.Col([
                 html.Label("Language (for FP→KLOC conversion)"),
                 dcc.Dropdown(
                     id="cocomo-language",
                     options=[{"label": f"{k} ({v} LOC/FP)", "value": k} for k, v in FP_TO_LOC.items()],
-                    value="Python", clearable=False
+                    value="Python (Capers Jones)", clearable=False
                 ),
-                dbc.Button("Auto-fill from FPA", id="cocomo-autofill-btn", color="secondary", size="sm", className="mt-2")
+                dbc.Button("Auto-fill from FPA", id="cocomo-autofill-btn", color="secondary", size="sm", className="mt-2"),
+                html.Div(id="cocomo-autofill-explanation"),
+                html.Small("15 common languages shown. ", className="text-muted"),
+                html.A("See full table for all languages", href="https://www.qsm.com/resources/function-point-languages-table", target="_blank", className="small"),
             ], width=6),
         ]),
 
         html.Hr(),
-        html.H5("Step 2: Project Type"),
+        html.H5("Step 2: Select Project Type", style={"fontSize": "1.3rem", "fontWeight": "700"}),
         dcc.Dropdown(
             id="cocomo-type",
             options=[
-                {"label": "Organic — Small team, familiar domain, flexible requirements", "value": "Organic"},
-                {"label": "Semi-detached — Medium team, mixed experience", "value": "Semi-detached"},
-                {"label": "Embedded — Tight constraints, safety-critical", "value": "Embedded"},
+                {"label": "Organic — Well-understood problem, experienced team, flexible environment (2–50 KLOC)", "value": "Organic"},
+                {"label": "Semi-Detached — Partially understood problem, mixed experience, moderate constraints (50–300 KLOC)", "value": "Semi-detached"},
+                {"label": "Embedded — Novel/complex domain, strict constraints, specialised experts required (300+ KLOC)", "value": "Embedded"},
             ],
             value="Organic", clearable=False
         ),
+
+        html.Hr(),
+        html.H5("Formulas", style={"fontSize": "1.3rem", "fontWeight": "700"}),
+        html.P([
+            html.Strong("Effort (E)"), " = a × (KLOC)^b  → person-months", html.Br(),
+            html.Strong("Duration (T)"), " = c × (E)^d  → calendar months", html.Br(),
+            html.Strong("Team Size"), " = E ÷ T  → people required", html.Br(),
+        ], className="small"),
 
         html.Hr(),
         dbc.Button("Calculate COCOMO", id="cocomo-calculate-btn", color="primary", className="mb-3"),
@@ -386,6 +580,7 @@ def render_cocomo_tab():
 
 @callback(
     Output("cocomo-kloc", "value"),
+    Output("cocomo-autofill-explanation", "children"),
     Input("cocomo-autofill-btn", "n_clicks"),
     State("fpa-store", "data"),
     State("cocomo-language", "value"),
@@ -395,8 +590,12 @@ def autofill_kloc(n_clicks, fpa_data, language):
     if fpa_data and fpa_data.get("adjusted_fp"):
         fp = fpa_data["adjusted_fp"]
         loc_per_fp = FP_TO_LOC.get(language, 53)
-        return round((fp * loc_per_fp) / 1000, 2)
-    return dash.no_update
+        kloc = round((fp * loc_per_fp) / 1000, 2)
+        explanation = html.P([
+            html.Strong("Auto-filled: "), f"KLOC = {fp} FP × {loc_per_fp} LOC/FP ÷ 1000 = ", html.Strong(f"{kloc} KLOC")
+        ], className="text-success small mt-1")
+        return kloc, explanation
+    return dash.no_update, html.P("No FPA data found. Complete FPA first.", className="text-warning small mt-1")
 
 
 @callback(
@@ -427,13 +626,24 @@ def calculate_cocomo(n_clicks, kloc, project_type):
                 dbc.Col(dbc.Card(dbc.CardBody([html.H6("Team Size"), html.H3(f"~{team_size} people")])), width=4),
             ]),
             html.Hr(),
-            html.P([
-                html.Strong("Formulas:"), html.Br(),
-                f"Effort = {params['a']} × ({kloc})^{params['b']} = {effort} person-months", html.Br(),
-                f"Duration = {params['c']} × ({effort})^{params['d']} = {duration} months", html.Br(),
-                f"Team Size = {effort} ÷ {duration} = {team_size} people"
-            ], className="text-muted"),
-            dbc.Alert(f"COCOMO: {effort} person-months over {duration} months. Proceed to PERT.", color="success")
+            # Formula (left) | Calculation (right)
+            dbc.Table([
+                html.Thead(html.Tr([html.Th("Formula"), html.Th("Calculation")])),
+                html.Tbody([
+                    html.Tr([
+                        html.Td(f"E = a × (KLOC)^b"),
+                        html.Td(html.Strong(f"E = {params['a']} × ({kloc})^{params['b']} = {effort} person-months"))
+                    ]),
+                    html.Tr([
+                        html.Td(f"T = c × (E)^d"),
+                        html.Td(html.Strong(f"T = {params['c']} × ({effort})^{params['d']} = {duration} months"))
+                    ]),
+                    html.Tr([
+                        html.Td("Team Size = E ÷ T"),
+                        html.Td(html.Strong(f"Team Size = {effort} ÷ {duration} = {team_size} people"))
+                    ]),
+                ])
+            ], bordered=True, size="sm", className="mt-2"),
         ])
     ], className="mt-3")
 
@@ -445,40 +655,113 @@ def calculate_cocomo(n_clicks, kloc, project_type):
 # ============================================================
 
 def render_pert_tab():
-    # Default 5 tasks
+    # Default 5 tasks - step=1 for whole numbers, min=0.1 for fractional input via keyboard
     task_rows = []
-    default_tasks = ["Requirements", "Design", "Development", "Testing", "Deployment"]
-    for i in range(5):
+    default_tasks = ["Requirements", "Design", "Development", "Testing", "Deployment", "", "", "", "", ""]
+    for i in range(10):
+        visible = i < 5  # First 5 visible by default
         task_rows.append(dbc.Row([
-            dbc.Col(dbc.Input(id={"type": "pert-name", "index": i}, value=default_tasks[i], placeholder="Task name"), width=3),
-            dbc.Col(dbc.Input(id={"type": "pert-o", "index": i}, type="number", value=2, min=0.1, step=0.5, placeholder="O"), width=2),
-            dbc.Col(dbc.Input(id={"type": "pert-m", "index": i}, type="number", value=4, min=0.1, step=0.5, placeholder="M"), width=2),
-            dbc.Col(dbc.Input(id={"type": "pert-p", "index": i}, type="number", value=8, min=0.1, step=0.5, placeholder="P"), width=2),
-            dbc.Col(html.Div(id={"type": "pert-result-cell", "index": i}), width=3),
-        ], className="mb-2"))
+            dbc.Col(dbc.Input(id={"type": "pert-name", "index": i}, value=default_tasks[i], placeholder="Task name"), width=4),
+            dbc.Col(dbc.Input(id={"type": "pert-o", "index": i}, type="number", value=2 if visible else "", min=0.1, step=0.1, placeholder="O"), width=2),
+            dbc.Col(dbc.Input(id={"type": "pert-m", "index": i}, type="number", value=4 if visible else "", min=0.1, step=0.1, placeholder="M"), width=2),
+            dbc.Col(dbc.Input(id={"type": "pert-p", "index": i}, type="number", value=8 if visible else "", min=0.1, step=0.1, placeholder="P"), width=2),
+        ], className="mb-2", id={"type": "pert-row", "index": i}, style={} if visible else {"display": "none"}))
 
     return html.Div([
         html.H4("PERT — Three-Point Estimation"),
         html.Ul([
             html.Li([html.Strong("Definition: "), "Quantifies estimation uncertainty by calculating a weighted average from three scenarios (Optimistic, Most Likely, Pessimistic), producing a confidence range rather than a single-point estimate."]),
             html.Li([html.Strong("Use case: "), "When project conditions are uncertain or novel, and stakeholders need to understand the range of possible outcomes — enabling risk-aware planning and contingency justification."]),
-            html.Li([html.Strong("Formula: "), "Expected = (O + 4M + P) / 6  |  Standard Deviation σ = (P - O) / 6"]),
         ], className="mb-3"),
 
-        html.H5("Enter Estimates Per Phase (in weeks)"),
+        html.H5("Formulas", style={"fontSize": "1.3rem", "fontWeight": "700"}),
+        html.P([
+            html.Strong("Expected (weighted mean)"), " = (O + 4M + P) / 6  — calculated per task", html.Br(),
+            html.Strong("Standard Deviation (σ)"), " = (P - O) / 6  — measures uncertainty per task", html.Br(),
+            html.Strong("Total Expected"), " = Sum of all task Expecteds", html.Br(),
+            html.Strong("Total σ"), " = √(σ₁² + σ₂² + σ₃² + ...)  — statistical combination of independent uncertainties",
+        ], className="small"),
+
+        # Explanation dropdown
+        dbc.Accordion([
+            dbc.AccordionItem([
+                html.P([
+                    html.Strong("Expected (E)"), " is the weighted mean duration for each task. "
+                    "The formula weights the Most Likely estimate 4× more heavily than Optimistic or Pessimistic, "
+                    "because most outcomes cluster around the middle scenario.", html.Br(), html.Br(),
+                    html.Strong("Standard Deviation (σ)"), " measures how spread out the estimate is — how uncertain you are. ", html.Br(),
+                    "A task with O=3, M=4, P=5 has LOW uncertainty (σ = 0.33 weeks).", html.Br(),
+                    "A task with O=2, M=4, P=12 has HIGH uncertainty (σ = 1.67 weeks).", html.Br(), html.Br(),
+                    html.Strong("Why both?"), " Expected alone gives false precision. σ tells stakeholders the RANGE of likely outcomes.", html.Br(), html.Br(),
+                    html.Strong("Confidence Levels (Normal Distribution):"), html.Br(),
+                    "68% confidence: Expected ± 1σ (fairly sure)", html.Br(),
+                    "95% confidence: Expected ± 2σ (very confident)", html.Br(),
+                    "99% confidence: Expected ± 3σ (nearly certain)", html.Br(),
+                    html.A("Learn more about Normal Distribution", href="https://www.scribbr.co.uk/stats/the-normal-distribution/", target="_blank"),
+                ], className="small"),
+            ], title="How does PERT calculation work? (Expected vs Standard Deviation)")
+        ], start_collapsed=True, className="mb-3"),
+
+        # Worked Example
+        dbc.Accordion([
+            dbc.AccordionItem([
+                html.P("Calculation is done PER TASK, then totals are combined:", className="fw-bold"),
+                dbc.Table([
+                    html.Thead(html.Tr([html.Th("Task"), html.Th("O"), html.Th("M"), html.Th("P"), html.Th("Expected = (O+4M+P)/6"), html.Th("σ = (P-O)/6")])),
+                    html.Tbody([
+                        html.Tr([html.Td("Requirements"), html.Td("1"), html.Td("2"), html.Td("5"), html.Td("(1+8+5)/6 = 2.33"), html.Td("(5-1)/6 = 0.67")]),
+                        html.Tr([html.Td("Design"), html.Td("2"), html.Td("3"), html.Td("6"), html.Td("(2+12+6)/6 = 3.33"), html.Td("(6-2)/6 = 0.67")]),
+                        html.Tr([html.Td("Development"), html.Td("8"), html.Td("12"), html.Td("20"), html.Td("(8+48+20)/6 = 12.67"), html.Td("(20-8)/6 = 2.00")]),
+                        html.Tr([html.Td(html.Strong("TOTAL")), html.Td(""), html.Td(""), html.Td(""), html.Td(html.Strong("18.33 weeks")), html.Td(html.Strong("√(0.67²+0.67²+2.00²) = 2.19"))]),
+                    ])
+                ], bordered=True, size="sm"),
+                html.P([
+                    html.Strong("Result: "), "Expected = 18.33 weeks", html.Br(),
+                    "95% confidence (±2σ): 18.33 ± 4.38 = ", html.Strong("13.95 to 22.71 weeks")
+                ]),
+            ], title="See Worked Example")
+        ], start_collapsed=True, className="mb-3"),
+
+        html.H5("Enter Estimates Per Phase (in weeks)", style={"fontSize": "1.3rem", "fontWeight": "700"}),
+        html.P([
+            "Tasks can be edited, added, or removed as needed — every project has different phases.", html.Br(),
+            html.Strong("Rule: "), "P ≥ M ≥ O > 0 (Pessimistic must be ≥ Most Likely, which must be ≥ Optimistic. All must be positive.)"
+        ], className="text-muted small"),
         dbc.Row([
-            dbc.Col(html.Strong("Task/Phase"), width=3),
-            dbc.Col(html.Strong("Optimistic"), width=2),
-            dbc.Col(html.Strong("Most Likely"), width=2),
-            dbc.Col(html.Strong("Pessimistic"), width=2),
-            dbc.Col(html.Strong("Expected (±σ)"), width=3),
+            dbc.Col(html.Strong("Task/Phase"), width=4),
+            dbc.Col(html.Strong("Optimistic (O)"), width=2),
+            dbc.Col(html.Strong("Most Likely (M)"), width=2),
+            dbc.Col(html.Strong("Pessimistic (P)"), width=2),
         ], className="mb-2"),
         *task_rows,
+        dbc.Row([
+            dbc.Col(dbc.Button("+ Add Task", id="pert-add-btn", color="secondary", size="sm"), width=2),
+            dbc.Col(dbc.Button("- Remove Task", id="pert-remove-btn", color="secondary", size="sm"), width=2),
+        ], className="mb-3"),
 
         html.Hr(),
         dbc.Button("Calculate PERT", id="pert-calculate-btn", color="primary", className="mb-3"),
         html.Div(id="pert-results")
     ])
+
+
+# PERT Add/Remove row callbacks
+@callback(
+    Output("pert-row-count", "data"),
+    Output({"type": "pert-row", "index": ALL}, "style"),
+    Input("pert-add-btn", "n_clicks"),
+    Input("pert-remove-btn", "n_clicks"),
+    State("pert-row-count", "data"),
+    prevent_initial_call=True
+)
+def update_pert_rows(add_clicks, remove_clicks, current_count):
+    triggered = ctx.triggered_id
+    if triggered == "pert-add-btn":
+        current_count = min((current_count or 5) + 1, 10)
+    elif triggered == "pert-remove-btn":
+        current_count = max((current_count or 5) - 1, 1)
+    styles = [{} if i < current_count else {"display": "none"} for i in range(10)]
+    return current_count, styles
 
 
 @callback(
@@ -489,18 +772,37 @@ def render_pert_tab():
     State({"type": "pert-o", "index": ALL}, "value"),
     State({"type": "pert-m", "index": ALL}, "value"),
     State({"type": "pert-p", "index": ALL}, "value"),
+    State("pert-row-count", "data"),
     prevent_initial_call=True
 )
-def calculate_pert(n_clicks, names, o_vals, m_vals, p_vals):
+def calculate_pert(n_clicks, names, o_vals, m_vals, p_vals, row_count):
+    visible_count = row_count or 5
     tasks = []
-    for i in range(len(names)):
+    for i in range(min(visible_count, len(names))):
         name = names[i] or f"Task {i+1}"
-        o = float(o_vals[i]) if o_vals[i] else 2
-        m = float(m_vals[i]) if m_vals[i] else 4
-        p = float(p_vals[i]) if p_vals[i] else 8
+        o = float(o_vals[i]) if (o_vals[i] is not None and o_vals[i] != "") else 0
+        m = float(m_vals[i]) if (m_vals[i] is not None and m_vals[i] != "") else 0
+        p = float(p_vals[i]) if (p_vals[i] is not None and p_vals[i] != "") else 0
+        # Skip rows with no meaningful name and all zeros
+        if not names[i] and o == 0 and m == 0 and p == 0:
+            continue
         expected = round((o + 4 * m + p) / 6, 2)
         sigma = round((p - o) / 6, 2)
         tasks.append({"name": name, "o": o, "m": m, "p": p, "expected": expected, "sigma": sigma})
+
+    # Validate P >= M >= O > 0
+    violations = []
+    for t in tasks:
+        if not (t["p"] >= t["m"] >= t["o"] > 0):
+            violations.append(f"⚠️ {t['name']}: O={t['o']}, M={t['m']}, P={t['p']} — violates rule P ≥ M ≥ O > 0")
+
+    if violations:
+        warning = dbc.Alert([
+            html.Strong("⚠️ Validation Warning: "), "Some tasks violate the PERT rule (P ≥ M ≥ O > 0):", html.Br(),
+            html.Ul([html.Li(v) for v in violations]),
+            "Results may be unreliable. Please correct the values above."
+        ], color="warning", className="mt-2")
+        return warning, None
 
     total_expected = round(sum(t["expected"] for t in tasks), 2)
     total_sigma = round(sum(t["sigma"] ** 2 for t in tasks) ** 0.5, 2)
@@ -512,10 +814,12 @@ def calculate_pert(n_clicks, names, o_vals, m_vals, p_vals):
     for t in tasks:
         table_rows.append(html.Tr([html.Td(t["name"]), html.Td(t["o"]), html.Td(t["m"]), html.Td(t["p"]), html.Td(t["expected"]), html.Td(f"±{t['sigma']}")]))
 
-    conf_68_low = round(total_expected - total_sigma, 1)
+    conf_68_low = max(0, round(total_expected - total_sigma, 1))
     conf_68_high = round(total_expected + total_sigma, 1)
-    conf_95_low = round(total_expected - 2 * total_sigma, 1)
+    conf_95_low = max(0, round(total_expected - 2 * total_sigma, 1))
     conf_95_high = round(total_expected + 2 * total_sigma, 1)
+    conf_99_low = max(0, round(total_expected - 3 * total_sigma, 1))
+    conf_99_high = round(total_expected + 3 * total_sigma, 1)
 
     results = dbc.Card([
         dbc.CardBody([
@@ -524,10 +828,13 @@ def calculate_pert(n_clicks, names, o_vals, m_vals, p_vals):
             dbc.Row([
                 dbc.Col(dbc.Card(dbc.CardBody([html.H6("Total Expected"), html.H3(f"{total_expected} weeks")])), width=3),
                 dbc.Col(dbc.Card(dbc.CardBody([html.H6("Total σ"), html.H3(f"±{total_sigma} weeks")])), width=3),
-                dbc.Col(dbc.Card(dbc.CardBody([html.H6("68% Confidence"), html.H3(f"{conf_68_low}–{conf_68_high} wks")])), width=3),
-                dbc.Col(dbc.Card(dbc.CardBody([html.H6("95% Confidence"), html.H3(f"{conf_95_low}–{conf_95_high} wks")])), width=3),
+                dbc.Col(dbc.Card(dbc.CardBody([html.H6("68% (±1σ)"), html.H3(f"{conf_68_low}–{conf_68_high} wks")])), width=2),
+                dbc.Col(dbc.Card(dbc.CardBody([html.H6("95% (±2σ)"), html.H3(f"{conf_95_low}–{conf_95_high} wks")])), width=2),
+                dbc.Col(dbc.Card(dbc.CardBody([html.H6("99% (±3σ)"), html.H3(f"{conf_99_low}–{conf_99_high} wks")])), width=2),
             ]),
-            dbc.Alert(f"PERT: Expected {total_expected} weeks (95% range: {conf_95_low}–{conf_95_high}). Proceed to Cost.", color="success", className="mt-3")
+            html.P([
+                html.A("Understanding confidence intervals (Normal Distribution)", href="https://www.scribbr.co.uk/stats/the-normal-distribution/", target="_blank")
+            ], className="small mt-2 text-muted"),
         ])
     ], className="mt-3")
 
@@ -540,31 +847,59 @@ def calculate_pert(n_clicks, names, o_vals, m_vals, p_vals):
 
 def render_cost_tab():
     role_rows = []
-    default_roles = [("Project Manager", 500, 20), ("Developer", 450, 40), ("QA Engineer", 400, 25), ("UX Designer", 400, 15)]
-    for i, (role, rate, alloc) in enumerate(default_roles):
+    default_roles = [("Project Manager", 500, 20), ("Developer", 450, 40), ("QA Engineer", 400, 25), ("UX Designer", 400, 15), ("", 0, 0), ("", 0, 0), ("", 0, 0), ("", 0, 0)]
+    for i in range(8):
+        visible = i < 4
+        role, rate, alloc = default_roles[i]
         role_rows.append(dbc.Row([
-            dbc.Col(dbc.Input(id={"type": "cost-role", "index": i}, value=role), width=3),
+            dbc.Col(dbc.Input(id={"type": "cost-role", "index": i}, value=role, placeholder="Role name"), width=3),
             dbc.Col(dbc.Input(id={"type": "cost-rate", "index": i}, type="number", value=rate, min=0), width=3),
             dbc.Col(dbc.Input(id={"type": "cost-alloc", "index": i}, type="number", value=alloc, min=0, max=100), width=3),
-        ], className="mb-2"))
+        ], className="mb-2", id={"type": "cost-row", "index": i}, style={} if visible else {"display": "none"}))
 
     return html.Div([
-        html.H4("Cost Calculation"),
+        html.H4("Cost Contingency Calculator"),
         html.Ul([
             html.Li([html.Strong("Definition: "), "Translates effort estimates into monetary terms by factoring in team composition, role-specific daily rates, allocation percentages, and a contingency buffer for risk."]),
             html.Li([html.Strong("Use case: "), "When you need a budget figure for project approval — accounting for the reality that different roles cost differently and that all estimates carry inherent uncertainty requiring contingency."]),
         ], className="mb-3"),
 
-        html.H5("Team Composition"),
+        # Contingency explanation dropdown
+        dbc.Accordion([
+            dbc.AccordionItem([
+                html.P([
+                    html.Strong("What is contingency?"), html.Br(),
+                    "A percentage added to the base cost to account for estimation errors, scope changes, technical surprises, and resource risks.", html.Br(), html.Br(),
+                    html.Strong("Industry standard guidance:"), html.Br(),
+                    "10% — Low risk: familiar project, experienced team, stable requirements.", html.Br(),
+                    "20% — Moderate risk: some novel elements, partially understood domain.", html.Br(),
+                    "30% — High risk: novel project, new team, unclear requirements, significant unknowns.", html.Br(), html.Br(),
+                    html.Strong("Why it matters:"), html.Br(),
+                    "The QuickShop case study (Week 5) demonstrated that projects without contingency are guaranteed to overrun. ",
+                    "Contingency IS risk management in financial terms — it's how you respond to identified risks without needing to re-budget.", html.Br(), html.Br(),
+                    html.Strong("Professional practice:"), html.Br(),
+                    "Every credible PM organisation (PMI, APM) recommends contingency. Not including it is considered unprofessional.", html.Br(),
+                    html.A("PMI Practice Guide: Managing Change in Organizations", href="https://www.pmi.org/", target="_blank"), " | ",
+                    html.A("APM Body of Knowledge", href="https://www.apm.org.uk/body-of-knowledge/", target="_blank"),
+                ], className="small"),
+            ], title="How does contingency work? (Industry standards)")
+        ], start_collapsed=True, className="mb-3"),
+
+        html.H5("Team Composition", style={"fontSize": "1.3rem", "fontWeight": "700"}),
+        html.P("Roles can be edited — adjust names, rates, and allocation to match your project team.", className="text-muted small"),
         dbc.Row([
             dbc.Col(html.Strong("Role"), width=3),
             dbc.Col(html.Strong("Daily Rate (£)"), width=3),
             dbc.Col(html.Strong("% Allocation"), width=3),
         ], className="mb-2"),
         *role_rows,
+        dbc.Row([
+            dbc.Col(dbc.Button("+ Add Role", id="cost-add-btn", color="secondary", size="sm"), width=2),
+            dbc.Col(dbc.Button("- Remove Role", id="cost-remove-btn", color="secondary", size="sm"), width=2),
+        ], className="mb-3"),
 
         html.Hr(),
-        html.H5("Duration & Contingency"),
+        html.H5("Duration & Contingency", style={"fontSize": "1.3rem", "fontWeight": "700"}),
         dbc.Row([
             dbc.Col([
                 html.Label("Duration (months)"),
@@ -576,8 +911,8 @@ def render_cost_tab():
             ], width=4),
             dbc.Col([
                 html.Label("Contingency (%)"),
-                dcc.Slider(id="cost-contingency", min=0, max=30, step=5, value=20,
-                           marks={0: "0%", 10: "10%", 20: "20%", 30: "30%"})
+                dcc.Slider(id="cost-contingency", min=0, max=30, step=1, value=20,
+                           marks={0: "0%", 5: "5%", 10: "10%", 15: "15%", 20: "20%", 25: "25%", 30: "30%"})
             ], width=4),
         ]),
 
@@ -585,6 +920,25 @@ def render_cost_tab():
         dbc.Button("Calculate Cost", id="cost-calculate-btn", color="primary", className="mb-3"),
         html.Div(id="cost-results")
     ])
+
+
+# Cost Add/Remove role callbacks
+@callback(
+    Output("cost-row-count", "data"),
+    Output({"type": "cost-row", "index": ALL}, "style"),
+    Input("cost-add-btn", "n_clicks"),
+    Input("cost-remove-btn", "n_clicks"),
+    State("cost-row-count", "data"),
+    prevent_initial_call=True
+)
+def update_cost_rows(add_clicks, remove_clicks, current_count):
+    triggered = ctx.triggered_id
+    if triggered == "cost-add-btn":
+        current_count = min((current_count or 4) + 1, 8)
+    elif triggered == "cost-remove-btn":
+        current_count = max((current_count or 4) - 1, 1)
+    styles = [{} if i < current_count else {"display": "none"} for i in range(8)]
+    return current_count, styles
 
 
 @callback(
@@ -597,17 +951,22 @@ def render_cost_tab():
     State("cost-duration", "value"),
     State("cost-days-per-month", "value"),
     State("cost-contingency", "value"),
+    State("cost-row-count", "data"),
     prevent_initial_call=True
 )
-def calculate_cost(n_clicks, roles, rates, allocs, duration, days_per_month, contingency_pct):
+def calculate_cost(n_clicks, roles, rates, allocs, duration, days_per_month, contingency_pct, row_count):
+    visible_count = row_count or 4
     total_days = (duration or 6) * (days_per_month or 22)
     base_cost = 0
     breakdown = []
 
-    for i in range(len(roles)):
+    for i in range(min(visible_count, len(roles))):
         role = roles[i] or f"Role {i+1}"
         rate = float(rates[i]) if rates[i] else 0
         alloc = float(allocs[i]) if allocs[i] else 0
+        # Skip rows with no meaningful name and zero values
+        if not roles[i] and rate == 0 and alloc == 0:
+            continue
         days = total_days * (alloc / 100)
         cost = days * rate
         base_cost += cost
@@ -628,14 +987,9 @@ def calculate_cost(n_clicks, roles, rates, allocs, duration, days_per_month, con
             dbc.Row([
                 dbc.Col(dbc.Card(dbc.CardBody([html.H6("Base Cost"), html.H3(f"£{base_cost:,.0f}")])), width=4),
                 dbc.Col(dbc.Card(dbc.CardBody([html.H6(f"Contingency ({contingency_pct}%)"), html.H3(f"£{contingency_amount:,.0f}")])), width=4),
-                dbc.Col(dbc.Card(dbc.CardBody([html.H6("Total Estimated Cost"), html.H3(f"£{total_cost:,.0f}")])), width=4),
+                dbc.Col(dbc.Card(dbc.CardBody([html.H6("Total Estimated Cost (Base + Contingency)"), html.H3(f"£{total_cost:,.0f}")])), width=4),
             ]),
-            dbc.Alert([
-                html.Strong(f"Why {contingency_pct}% contingency? "),
-                "Projects without contingency are guaranteed to overrun (QuickShop case study, Week 5). ",
-                f"A {contingency_pct}% buffer accounts for estimation uncertainty and unforeseen challenges."
-            ], color="warning", className="mt-3"),
-            dbc.Alert(f"Total: £{total_cost:,.0f}. Proceed to Summary.", color="success")
+            html.P(f"Total = Base Cost × (1 + Contingency %) = £{base_cost:,.0f} × {round(1 + contingency_pct/100, 2)} = £{total_cost:,.0f}", className="mt-2 text-muted"),
         ])
     ], className="mt-3")
 
@@ -679,54 +1033,28 @@ def generate_summary(n_clicks, fpa_data, cocomo_data, pert_data, cost_data):
     if not rows:
         return dbc.Alert("No data yet. Please complete at least one estimation module.", color="warning")
 
-    comparison_table = dbc.Table(
-        [html.Tr([html.Th("Method"), html.Th("Key Output"), html.Th("Question Answered"), html.Th("Best For")])] + rows,
-        bordered=True, striped=True
-    )
-
     # Executive summary
-    exec_summary = []
-    if fpa_data and cocomo_data and cost_data:
-        exec_summary = dbc.Card([
-            dbc.CardBody([
-                html.H5("Executive Summary"),
-                html.Table([
-                    html.Tr([html.Td(html.Strong("Size")), html.Td(f"{fpa_data['adjusted_fp']} Function Points")]),
-                    html.Tr([html.Td(html.Strong("Effort")), html.Td(f"{cocomo_data['effort']} person-months")]),
-                    html.Tr([html.Td(html.Strong("Duration")), html.Td(f"{cocomo_data['duration']} months")]),
-                    html.Tr([html.Td(html.Strong("Team Size")), html.Td(f"~{cocomo_data['team_size']} people")]),
-                    html.Tr([html.Td(html.Strong("Total Cost")), html.Td(f"£{cost_data['total_cost']:,.0f}")]),
-                    html.Tr([html.Td(html.Strong("Confidence")), html.Td(f"±{pert_data['total_sigma']} weeks" if pert_data else "Complete PERT for range")]),
-                ], className="table"),
-                html.Hr(),
-                html.P([
-                    html.Strong("Recommendation: "),
-                    f"Based on multi-method analysis, we recommend a budget of £{cost_data['total_cost']:,.0f} ",
-                    f"with a timeline of {cocomo_data['duration']} months and a team of ~{cocomo_data['team_size']} people."
-                ])
-            ])
-        ], color="light", className="mt-3")
-
-    method_guide = dbc.Card([
+    exec_summary = dbc.Card([
         dbc.CardBody([
-                html.H5("Method Selection Guide"),
-            dbc.Table([
-                html.Tr([html.Th("Scenario"), html.Th("Method"), html.Th("Why")]),
-                html.Tr([html.Td("Requirements well-defined"), html.Td("FPA"), html.Td("Technology-independent sizing")]),
-                html.Tr([html.Td("Need staffing/timeline"), html.Td("COCOMO"), html.Td("Converts size to effort")]),
-                html.Tr([html.Td("High uncertainty"), html.Td("PERT"), html.Td("Provides confidence range")]),
-                html.Tr([html.Td("Budget approval"), html.Td("Cost Model"), html.Td("Monetary terms + contingency")]),
-                html.Tr([html.Td(html.Strong("Complete picture")), html.Td(html.Strong("All four")), html.Td(html.Strong("Each answers a different question"))]),
-            ], bordered=True, size="sm")
+            html.H5("Executive Summary"),
+            html.Table([
+                html.Tr([html.Td(html.Strong("Size (FPA)")), html.Td(f"{fpa_data['adjusted_fp']} Function Points" if fpa_data else "—")]),
+                html.Tr([html.Td(html.Strong("Effort (COCOMO)")), html.Td(f"{cocomo_data['effort']} person-months" if cocomo_data else "—")]),
+                html.Tr([html.Td(html.Strong("Duration (COCOMO)")), html.Td(f"{cocomo_data['duration']} months" if cocomo_data else "—")]),
+                html.Tr([html.Td(html.Strong("Team Size (COCOMO)")), html.Td(f"~{int(round(cocomo_data['team_size']))} people" if cocomo_data else "—")]),
+                html.Tr([html.Td(html.Strong("Confidence (PERT)")), html.Td(f"{pert_data['total_expected']} weeks ± {pert_data['total_sigma']} weeks" if pert_data else "—")]),
+                html.Tr([html.Td(html.Strong("Total Cost")), html.Td(f"£{cost_data['total_cost']:,.0f} (incl. {cost_data['contingency_pct']}% contingency)" if cost_data else "—")]),
+            ], className="table"),
+            html.Hr(),
+            html.P([
+                html.Strong("Recommendation: "),
+                f"Based on multi-method analysis, we recommend a budget of £{cost_data['total_cost']:,.0f} "
+                f"with a timeline of {cocomo_data['duration']} months and a team of ~{int(round(cocomo_data['team_size']))} people."
+            ]) if (cocomo_data and cost_data) else ""
         ])
-    ], className="mt-3")
+    ], color="light", className="mt-3")
 
-    return html.Div([
-        html.H5("Side-by-Side Comparison"),
-        comparison_table,
-        exec_summary if exec_summary else "",
-        method_guide
-    ])
+    return html.Div([exec_summary])
 
 
 # ============================================================
