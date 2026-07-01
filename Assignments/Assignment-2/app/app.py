@@ -413,8 +413,7 @@ def render_fpa_tab():
                     ])
                 ], bordered=True, size="sm"),
                 html.P([
-                    html.Strong("Why are Internal Logical Files heaviest?"), " Because databases require design, normalisation, indexing, migration, and ongoing maintenance - significantly more effort per unit than input forms.", html.Br(),
-                    html.Strong("Reference: "), "Albrecht, A.J. (1979) 'Measuring Application Development Productivity', IBM Applications Development Symposium."
+                    html.Strong("Why are Internal Logical Files heaviest?"), " Because databases require design, normalisation, indexing, migration, and ongoing maintenance - significantly more effort per unit than input forms."
                 ], className="small text-muted"),
             ], title="View Standard Weight Table (Albrecht, 1979)")
         ], start_collapsed=True, className="mb-3"),
@@ -544,7 +543,6 @@ def render_cocomo_tab():
         html.P([
             html.Strong("KLOC = FP × (LOC/FP) ÷ 1000"), html.Br(),
             "Where LOC/FP is the industry-standard lines of code per function point for your chosen language.", html.Br(),
-            html.A("Full LOC/FP table for all languages (QSM)", href="https://www.qsm.com/resources/function-point-languages-table", target="_blank"),
         ], className="text-muted small"),
         dbc.Row([
             dbc.Col([
@@ -691,7 +689,7 @@ def render_pert_tab():
         html.P([
             html.Strong("Expected (weighted mean)"), " = (O + 4M + P) / 6  - calculated per task", html.Br(),
             html.Strong("Standard Deviation (σ)"), " = (P - O) / 6  - measures uncertainty per task", html.Br(),
-            html.Strong("Total Expected"), " = Sum of all task Expecteds", html.Br(),
+            html.Strong("Total Expected"), " = Sum of all task Expected", html.Br(),
             html.Strong("Total σ"), " = √(σ₁² + σ₂² + σ₃² + ...)  - statistical combination of independent uncertainties",
         ], className="small"),
 
@@ -845,9 +843,6 @@ def calculate_pert(n_clicks, names, o_vals, m_vals, p_vals, row_count):
                 dbc.Col(dbc.Card(dbc.CardBody([html.H6("95% (±2σ)"), html.H3(f"{conf_95_low}–{conf_95_high} wks")])), width=2),
                 dbc.Col(dbc.Card(dbc.CardBody([html.H6("99% (±3σ)"), html.H3(f"{conf_99_low}–{conf_99_high} wks")])), width=2),
             ]),
-            html.P([
-                html.A("Understanding confidence intervals (Normal Distribution)", href="https://www.scribbr.co.uk/stats/the-normal-distribution/", target="_blank")
-            ], className="small mt-2 text-muted"),
         ])
     ], className="mt-3")
 
@@ -892,8 +887,7 @@ def render_cost_tab():
                     "Contingency IS risk management in financial terms - it's how you respond to identified risks without needing to re-budget.", html.Br(), html.Br(),
                     html.Strong("Professional practice:"), html.Br(),
                     "Every credible PM organisation (PMI, APM) recommends contingency. Not including it is considered unprofessional.", html.Br(),
-                    html.A("PMI Practice Guide: Managing Change in Organizations", href="https://www.pmi.org/", target="_blank"), " | ",
-                    html.A("APM Body of Knowledge", href="https://www.apm.org.uk/body-of-knowledge/", target="_blank"),
+                    html.A("Smartsheet: Project Budget Contingency Guide", href="https://www.smartsheet.com/content/project-budget-contingency?srsltid=AfmBOoqLpMLpmFQUqhhkuuuiargGABrgr19TBHiUsC2wTKEM475XzSBQ", target="_blank"),
                 ], className="small"),
             ], title="How does contingency work? (Industry standards)")
         ], start_collapsed=True, className="mb-3"),
