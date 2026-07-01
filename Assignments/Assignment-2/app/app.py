@@ -533,10 +533,10 @@ def render_cocomo_tab():
         ], bordered=True, size="sm", className="mb-2 table-dark"),
         html.P([
             html.Strong("How constants work: "), html.Br(),
-            html.Strong("a"), " (effort multiplier): Higher for embedded projects → more effort per unit of code due to constraints.", html.Br(),
-            html.Strong("b"), " (effort exponent): >1 means effort grows faster than linearly with size - larger projects are disproportionately harder.", html.Br(),
-            html.Strong("c"), " (duration multiplier): Determines baseline calendar time.", html.Br(),
-            html.Strong("d"), " (duration exponent): <1 means adding more effort doesn't proportionally reduce duration (Brooks's Law).",
+            html.Strong("a"), " (effort multiplier): Scales base effort per KLOC. Higher values for embedded projects reflect the additional overhead imposed by strict operational constraints.", html.Br(),
+            html.Strong("b"), " (effort exponent): Because b > 1, effort grows faster than linearly with size - larger projects are disproportionately harder due to integration complexity and coordination costs.", html.Br(),
+            html.Strong("c"), " (duration multiplier): Sets the baseline calendar time from which schedule compression is calculated.", html.Br(),
+            html.Strong("d"), " (duration exponent): Because d < 1, doubling effort required does NOT double duration. This models the diminishing returns of staffing - adding more labour introduces communication friction, mathematically supporting Brooks's Law.",
         ], className="text-muted small"),
 
         html.Hr(),
@@ -549,7 +549,7 @@ def render_cocomo_tab():
         dbc.Row([
             dbc.Col([
                 html.Label("KLOC (thousands of lines of code)"),
-                dbc.Input(id="cocomo-kloc", type="number", value=10, min=0.1, step=0.5),
+                dbc.Input(id="cocomo-kloc", type="number", value=10, min=0.1, step=0.1),
             ], width=6),
             dbc.Col([
                 html.Label("Language (for FP→KLOC conversion)"),
@@ -644,12 +644,12 @@ def calculate_cocomo(n_clicks, kloc, project_type):
                 html.Thead(html.Tr([html.Th("Formula"), html.Th("Calculation")])),
                 html.Tbody([
                     html.Tr([
-                        html.Td(f"E = a × (KLOC)^b"),
-                        html.Td(html.Strong(f"E = {params['a']} × ({kloc})^{params['b']} = {effort} person-months"))
+                        html.Td([html.Span("E = a × (KLOC)"), html.Sup("b")]),
+                        html.Td(html.Strong([f"E = {params['a']} × ({kloc})", html.Sup(f"{params['b']}"), f" = {effort} person-months"]))
                     ]),
                     html.Tr([
-                        html.Td(f"T = c × (E)^d"),
-                        html.Td(html.Strong(f"T = {params['c']} × ({effort})^{params['d']} = {duration} months"))
+                        html.Td([html.Span("T = c × (E)"), html.Sup("d")]),
+                        html.Td(html.Strong([f"T = {params['c']} × ({effort})", html.Sup(f"{params['d']}"), f" = {duration} months"]))
                     ]),
                     html.Tr([
                         html.Td("Team Size = E ÷ T"),
