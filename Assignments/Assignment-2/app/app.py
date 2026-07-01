@@ -20,7 +20,6 @@ app = dash.Dash(
     __name__,
     external_stylesheets=[
         dbc.themes.FLATLY,
-        "https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&display=swap"
     ],
     suppress_callback_exceptions=True,
     title="Project Cost Estimation Tool"
@@ -28,7 +27,7 @@ app = dash.Dash(
 server = app.server  # Required for Render deployment
 
 # ============================================================
-# CONSTANTS — PM THEORY DATA
+# CONSTANTS - PM THEORY DATA
 # ============================================================
 
 # FPA Weight Table (Albrecht, 1979)
@@ -85,9 +84,9 @@ tabs = dbc.Tabs(
     id="main-tabs",
     active_tab="fpa",
     children=[
-        dbc.Tab(label="1. FPA — Size", tab_id="fpa"),
-        dbc.Tab(label="2. COCOMO — Effort", tab_id="cocomo"),
-        dbc.Tab(label="3. PERT — Uncertainty", tab_id="pert"),
+        dbc.Tab(label="1. FPA - Size", tab_id="fpa"),
+        dbc.Tab(label="2. COCOMO - Effort", tab_id="cocomo"),
+        dbc.Tab(label="3. PERT - Uncertainty", tab_id="pert"),
         dbc.Tab(label="4. Cost", tab_id="cost"),
         dbc.Tab(label="5. Summary", tab_id="summary"),
     ]
@@ -101,115 +100,129 @@ app.index_string = '''
         <title>{%title%}</title>
         {%favicon%}
         {%css%}
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700;800&display=swap" rel="stylesheet">
         <style>
-            /* LIGHT MODE — clean white with teal accents */
-            * { font-family: 'Inter', sans-serif !important; }
-            body { background-color: #f0f2f5 !important; color: #1a202c !important; }
-            .container-fluid { background-color: #f0f2f5 !important; }
+            /* ============ MINT TEAL DESIGN SYSTEM ============ */
+            :root {
+                --bg-main: #f8fafc;
+                --bg-card: #ffffff;
+                --primary: #0f766e;
+                --accent: #10b981;
+                --text-dark: #1f2937;
+                --text-muted: #6b7280;
+                --border: #e5e7eb;
+                --alert-info: #e0f2fe;
+                --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+                --shadow-md: 0 4px 6px rgba(0,0,0,0.04), 0 2px 4px rgba(0,0,0,0.03);
+                --radius: 12px;
+            }
+
+            * { font-family: 'EB Garamond', serif !important; }
+            body { background-color: var(--bg-main) !important; color: var(--text-dark) !important; }
+            .container-fluid { background-color: var(--bg-main) !important; }
 
             /* Typography */
-            h1, h2, h3, h4, h5, h6 { font-family: 'Inter', sans-serif !important; font-weight: 700; color: #1a202c !important; }
+            h1, h2, h3, h4, h5, h6 { font-family: 'EB Garamond', serif !important; font-weight: 700; color: var(--text-dark) !important; }
             h2 { font-size: 2.2rem !important; letter-spacing: -0.02em !important; }
-            h4 { font-size: 1.6rem !important; }
-            h5 { font-size: 1.15rem !important; text-transform: none !important; }
-            p, li, label, small { color: #4a5568 !important; }
-            .text-muted { color: #718096 !important; }
-            strong, b { color: #1a202c !important; }
-            a { color: #0d9488 !important; text-decoration: none !important; }
-            a:hover { color: #0f766e !important; text-decoration: underline !important; }
+            h4 { font-size: 1.5rem !important; }
+            h5 { font-size: 1.1rem !important; text-transform: none !important; }
+            p, li, label, small { color: #4b5563 !important; }
+            .text-muted { color: var(--text-muted) !important; }
+            strong, b { color: var(--text-dark) !important; }
+            a { color: var(--primary) !important; text-decoration: none !important; }
+            a:hover { color: #065f46 !important; text-decoration: underline !important; }
 
-            /* Cards — white with subtle shadow and teal top border */
-            .card { background-color: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 12px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important; border-top: 3px solid #0d9488 !important; }
-            .card-body h3 { font-size: 1.5rem; font-weight: 800 !important; color: #0d9488 !important; }
-            .card-body h6 { color: #64748b !important; font-weight: 500 !important; font-size: 0.85rem !important; }
+            /* Cards - white panels with soft shadow */
+            .card { background-color: var(--bg-card) !important; border: 1px solid var(--border) !important; border-radius: var(--radius) !important; box-shadow: var(--shadow-sm) !important; border-top: 3px solid var(--primary) !important; }
+            .card-body h3 { font-size: 1.5rem; font-weight: 800 !important; color: var(--primary) !important; }
+            .card-body h6 { color: var(--text-muted) !important; font-weight: 500 !important; font-size: 0.82rem !important; }
 
-            /* Tabs — clean pill style */
-            .nav-tabs { border-bottom: 1px solid #e2e8f0 !important; background-color: #ffffff !important; border-radius: 8px 8px 0 0 !important; padding: 4px !important; }
-            .nav-link { font-family: 'Inter', sans-serif !important; font-size: 0.9rem; color: #64748b !important; border: none !important; padding: 10px 18px !important; border-radius: 6px !important; }
-            .nav-link.active { color: #ffffff !important; background-color: #1a202c !important; font-weight: 600 !important; border-bottom: none !important; }
-            .nav-link:hover { color: #0d9488 !important; }
+            /* Tabs - wizard navigation with active indicator */
+            .nav-tabs { border-bottom: 2px solid var(--border) !important; background-color: var(--bg-card) !important; border-radius: 10px 10px 0 0 !important; padding: 6px 8px !important; }
+            .nav-link { font-size: 0.88rem; color: #9ca3af !important; border: none !important; padding: 10px 20px !important; border-radius: 8px !important; transition: all 0.2s !important; }
+            .nav-link.active { color: #ffffff !important; background-color: var(--primary) !important; font-weight: 600 !important; box-shadow: 0 2px 8px rgba(15,118,110,0.25) !important; }
+            .nav-link:hover:not(.active) { color: var(--primary) !important; background-color: #f0fdfa !important; }
 
-            /* Tables — clean light style */
-            .table { color: #1a202c !important; background-color: #ffffff !important; border-color: #e2e8f0 !important; }
-            .table thead th { background-color: #f8fafc !important; color: #0d9488 !important; border-bottom: 2px solid #e2e8f0 !important; font-weight: 600 !important; }
-            .table td { border-color: #e2e8f0 !important; color: #334155 !important; background-color: #ffffff !important; }
-            .table-striped tbody tr:nth-of-type(odd) td { background-color: #ffffff !important; }
-            .table-striped tbody tr:nth-of-type(even) td { background-color: #ffffff !important; }
-            .table-striped > tbody > tr:nth-of-type(odd) > * { --bs-table-striped-bg: #ffffff !important; background-color: #ffffff !important; color: #334155 !important; }
-            .table-bordered { border-color: #e2e8f0 !important; }
-            .table-dark { --bs-table-bg: #ffffff !important; --bs-table-striped-bg: #ffffff !important; background-color: #ffffff !important; }
-            .table-dark td, .table-dark th { background-color: #ffffff !important; color: #1a202c !important; border-color: #e2e8f0 !important; --bs-table-bg: #ffffff !important; }
-            .table-dark thead th { background-color: #ffffff !important; color: #0d9488 !important; }
-            .table-dark.table-striped > tbody > tr:nth-of-type(odd) > * { --bs-table-striped-bg: #ffffff !important; background-color: #ffffff !important; color: #1a202c !important; }
-            .table > :not(caption) > * > * { background-color: #ffffff !important; }
+            /* Tables - borderless modern style */
+            .table { color: var(--text-dark) !important; background-color: var(--bg-card) !important; border-color: var(--border) !important; border-collapse: separate !important; border-spacing: 0 !important; }
+            .table thead th { background-color: #f0fdfa !important; color: var(--primary) !important; border-bottom: 2px solid var(--border) !important; font-weight: 600 !important; font-size: 0.85rem !important; text-transform: uppercase !important; letter-spacing: 0.03em !important; }
+            .table td { border-color: var(--border) !important; color: #374151 !important; background-color: var(--bg-card) !important; padding: 10px 12px !important; }
+            .table-striped tbody tr:nth-of-type(odd) td { background-color: var(--bg-card) !important; }
+            .table-striped tbody tr:nth-of-type(even) td { background-color: var(--bg-card) !important; }
+            .table-striped > tbody > tr:nth-of-type(odd) > * { --bs-table-striped-bg: var(--bg-card) !important; background-color: var(--bg-card) !important; }
+            .table-bordered { border-color: var(--border) !important; }
+            .table-bordered td, .table-bordered th { border-left: none !important; border-right: none !important; }
+            .table-dark, .table-dark td, .table-dark th { --bs-table-bg: var(--bg-card) !important; --bs-table-striped-bg: var(--bg-card) !important; background-color: var(--bg-card) !important; color: var(--text-dark) !important; border-color: var(--border) !important; }
+            .table-dark thead th { background-color: #f0fdfa !important; color: var(--primary) !important; }
+            .table-dark.table-striped > tbody > tr:nth-of-type(odd) > * { --bs-table-striped-bg: var(--bg-card) !important; background-color: var(--bg-card) !important; }
+            .table > :not(caption) > * > * { background-color: var(--bg-card) !important; }
 
             /* Inputs & Dropdowns */
-            .form-control, input[type="number"] { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; color: #1a202c !important; border-radius: 8px !important; }
-            .form-control:focus, input:focus { border-color: #0d9488 !important; box-shadow: 0 0 0 2px rgba(13,148,136,0.15) !important; }
+            .form-control, input[type="number"] { background-color: var(--bg-card) !important; border: 1.5px solid var(--border) !important; color: var(--text-dark) !important; border-radius: 8px !important; padding: 8px 12px !important; }
+            .form-control:focus, input:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px rgba(16,185,129,0.12) !important; }
 
-            /* Buttons — teal primary */
-            .btn-primary { background-color: #0d9488 !important; border-color: #0d9488 !important; border-radius: 8px !important; padding: 12px 32px !important; font-weight: 600 !important; font-size: 1rem !important; color: #ffffff !important; }
-            .btn-primary:hover { background-color: #0f766e !important; box-shadow: 0 4px 12px rgba(13,148,136,0.25) !important; }
-            .btn-secondary { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #334155 !important; border-radius: 8px !important; font-weight: 600 !important; }
-            .btn-secondary:hover { background-color: #e2e8f0 !important; color: #1a202c !important; border-color: #0d9488 !important; }
+            /* Buttons - teal primary with depth */
+            .btn-primary { background-color: var(--primary) !important; border-color: var(--primary) !important; border-radius: 8px !important; padding: 12px 32px !important; font-weight: 600 !important; font-size: 0.95rem !important; color: #ffffff !important; box-shadow: 0 2px 4px rgba(15,118,110,0.2) !important; }
+            .btn-primary:hover { background-color: #065f46 !important; box-shadow: 0 4px 12px rgba(15,118,110,0.3) !important; }
+            .btn-secondary { background-color: var(--bg-main) !important; border: 1.5px solid var(--border) !important; color: #374151 !important; border-radius: 8px !important; font-weight: 600 !important; font-size: 0.85rem !important; }
+            .btn-secondary:hover { background-color: #f0fdfa !important; color: var(--primary) !important; border-color: var(--accent) !important; }
 
             /* Alerts */
-            .alert-success { background-color: #ecfdf5 !important; border: none !important; border-left: 4px solid #10b981 !important; color: #065f46 !important; border-radius: 6px !important; }
-            .alert-info { background-color: #eff6ff !important; border: none !important; border-left: 4px solid #3b82f6 !important; color: #1e40af !important; border-radius: 6px !important; }
-            .alert-warning { background-color: #fffbeb !important; border: none !important; border-left: 4px solid #f59e0b !important; color: #92400e !important; border-radius: 6px !important; }
+            .alert-success { background-color: #ecfdf5 !important; border: none !important; border-left: 4px solid var(--accent) !important; color: #065f46 !important; border-radius: 8px !important; }
+            .alert-info { background-color: var(--alert-info) !important; border: none !important; border-left: 4px solid #0ea5e9 !important; color: #0c4a6e !important; border-radius: 8px !important; padding: 14px 18px !important; }
+            .alert-warning { background-color: #fffbeb !important; border: none !important; border-left: 4px solid #f59e0b !important; color: #92400e !important; border-radius: 8px !important; }
 
             /* Accordion */
-            .accordion-button { background-color: #f8fafc !important; color: #1a202c !important; border: 1px solid #e2e8f0 !important; border-radius: 6px !important; }
-            .accordion-button:not(.collapsed) { background-color: #ecfdf5 !important; color: #0d9488 !important; }
-            .accordion-body { background-color: #ffffff !important; color: #4a5568 !important; }
-            .accordion-item { border-color: #e2e8f0 !important; border-radius: 6px !important; margin-bottom: 4px !important; }
+            .accordion-button { background-color: var(--bg-main) !important; color: var(--text-dark) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; font-weight: 500 !important; }
+            .accordion-button:not(.collapsed) { background-color: #f0fdfa !important; color: var(--primary) !important; font-weight: 600 !important; }
+            .accordion-body { background-color: var(--bg-card) !important; color: #4b5563 !important; border-radius: 0 0 8px 8px !important; }
+            .accordion-item { border-color: var(--border) !important; border-radius: 8px !important; margin-bottom: 6px !important; overflow: hidden !important; }
 
             /* Sliders */
-            .rc-slider-track { background-color: #0d9488 !important; }
-            .rc-slider-handle { border-color: #0d9488 !important; background-color: #ffffff !important; }
-            .rc-slider-rail { background-color: #e2e8f0 !important; }
-            .rc-slider-mark-text { color: #64748b !important; }
+            .rc-slider-track { background-color: var(--accent) !important; height: 6px !important; }
+            .rc-slider-handle { border-color: var(--accent) !important; background-color: var(--bg-card) !important; width: 18px !important; height: 18px !important; margin-top: -6px !important; box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; }
+            .rc-slider-rail { background-color: #e5e7eb !important; height: 6px !important; }
+            .rc-slider-mark-text { color: var(--text-muted) !important; font-size: 0.75rem !important; }
 
             /* Dropdown (Dash specific) */
-            .Select-control { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; border-radius: 8px !important; }
-            .Select-menu-outer { background-color: #ffffff !important; border-color: #e2e8f0 !important; }
-            .Select-option { background-color: #ffffff !important; color: #1a202c !important; }
-            .Select-option.is-focused { background-color: #ecfdf5 !important; color: #0d9488 !important; }
-            .Select-value-label { color: #1a202c !important; }
-            .Select-placeholder { color: #94a3b8 !important; }
-            .Select-value { color: #1a202c !important; }
-            .Select-input input { color: #1a202c !important; }
-            .Select-arrow-zone { color: #64748b !important; }
-            .dash-dropdown .Select-control { background-color: #ffffff !important; border: 1px solid #cbd5e1 !important; }
-            .dash-dropdown .Select-value-label { color: #1a202c !important; }
-            .dash-dropdown .Select-menu-outer { background-color: #ffffff !important; }
-            .dash-dropdown .VirtualizedSelectOption { background-color: #ffffff !important; color: #1a202c !important; }
-            .dash-dropdown .VirtualizedSelectFocusedOption { background-color: #ecfdf5 !important; color: #0d9488 !important; }
+            .Select-control { background-color: var(--bg-card) !important; border: 1.5px solid var(--border) !important; border-radius: 8px !important; }
+            .Select-menu-outer { background-color: var(--bg-card) !important; border-color: var(--border) !important; border-radius: 8px !important; box-shadow: var(--shadow-md) !important; }
+            .Select-option { background-color: var(--bg-card) !important; color: var(--text-dark) !important; }
+            .Select-option.is-focused { background-color: #f0fdfa !important; color: var(--primary) !important; }
+            .Select-value-label { color: var(--text-dark) !important; }
+            .Select-placeholder { color: #9ca3af !important; }
+            .Select-value { color: var(--text-dark) !important; }
+            .Select-input input { color: var(--text-dark) !important; }
+            .Select-arrow-zone { color: var(--text-muted) !important; }
+            .dash-dropdown .Select-control { background-color: var(--bg-card) !important; border: 1.5px solid var(--border) !important; }
+            .dash-dropdown .Select-value-label { color: var(--text-dark) !important; }
+            .dash-dropdown .Select-menu-outer { background-color: var(--bg-card) !important; }
+            .dash-dropdown .VirtualizedSelectOption { background-color: var(--bg-card) !important; color: var(--text-dark) !important; }
+            .dash-dropdown .VirtualizedSelectFocusedOption { background-color: #f0fdfa !important; color: var(--primary) !important; }
             div[class*="Select"] { background-color: transparent !important; }
-            .Select.is-focused > .Select-control { background-color: #ffffff !important; border-color: #0d9488 !important; }
-            .Select.has-value.Select--single > .Select-control { background-color: #ffffff !important; }
-            .Select.has-value.is-pseudo-focused.Select--single > .Select-control { background-color: #ffffff !important; }
+            .Select.is-focused > .Select-control { background-color: var(--bg-card) !important; border-color: var(--accent) !important; }
+            .Select.has-value.Select--single > .Select-control { background-color: var(--bg-card) !important; }
+            .Select.has-value.is-pseudo-focused.Select--single > .Select-control { background-color: var(--bg-card) !important; }
 
             /* Horizontal rules */
-            hr { border-color: #e2e8f0 !important; opacity: 0.6 !important; }
+            hr { border-color: var(--border) !important; opacity: 0.5 !important; }
 
             /* Footer */
-            .text-center.text-muted.small { color: #94a3b8 !important; }
+            .text-center.text-muted.small { color: #9ca3af !important; }
 
             /* UL/LI styling */
             ul { padding-left: 1.2rem !important; }
             li { margin-bottom: 0.4rem !important; }
 
             /* Accordion body tables */
-            .accordion-body .table { background-color: #ffffff !important; }
-            .accordion-body .table td { background-color: #ffffff !important; color: #334155 !important; font-weight: 500 !important; }
-            .accordion-body .table thead th { background-color: #f8fafc !important; color: #0d9488 !important; }
+            .accordion-body .table { background-color: var(--bg-card) !important; }
+            .accordion-body .table td { background-color: var(--bg-card) !important; color: #374151 !important; font-weight: 500 !important; }
+            .accordion-body .table thead th { background-color: #f0fdfa !important; color: var(--primary) !important; }
 
-            /* Card tables — results */
-            .card .table td { background-color: #ffffff !important; color: #1a202c !important; }
-            .card .table td strong, .card .table td b { color: #0d9488 !important; font-weight: 700 !important; }
-            .card .table thead th { background-color: #f8fafc !important; color: #0d9488 !important; }
+            /* Card tables - results */
+            .card .table td { background-color: var(--bg-card) !important; color: var(--text-dark) !important; }
+            .card .table td strong, .card .table td b { color: var(--primary) !important; font-weight: 700 !important; }
+            .card .table thead th { background-color: #f0fdfa !important; color: var(--primary) !important; }
         </style>
     </head>
     <body>
@@ -316,7 +329,7 @@ def render_fpa_tab():
         html.H4("Function Point Analysis (FPA)"),
         html.Ul([
             html.Li([html.Strong("Definition: "), "Provides an objective measure of a software system's size and complexity, independent of the technology used to implement it."]),
-            html.Li([html.Strong("Use case: "), "When requirements are well-defined and you need to quantify scope before development begins — enabling comparison across projects regardless of programming language."]),
+            html.Li([html.Strong("Use case: "), "When requirements are well-defined and you need to quantify scope before development begins - enabling comparison across projects regardless of programming language."]),
         ], className="mb-3"),
 
         html.H5("Step 1: Count Function Types", style={"fontSize": "1.3rem", "fontWeight": "700"}),
@@ -346,7 +359,7 @@ def render_fpa_tab():
 
         # Weight explanation
         html.P([
-            html.Strong("Weight"), " is a fixed value from the Albrecht standard weight table — NOT user-entered. ", html.Br(),
+            html.Strong("Weight"), " is a fixed value from the Albrecht standard weight table - NOT user-entered. ", html.Br(),
             "The app automatically looks up the correct weight based on your Function Type + Complexity selection. ",
             "These weights represent relative development effort derived from empirical research across hundreds of IBM projects (Albrecht, 1979). ",
             html.A("View original source (IFPUG)", href="https://www.ifpug.org/standards/fpa/", target="_blank"),
@@ -358,7 +371,7 @@ def render_fpa_tab():
         html.P([
             html.Strong("Count"), " is the number of distinct instances of each function type in your system.", html.Br(),
             "Count each unique form, report, lookup, data store, or external connection separately.", html.Br(),
-            "There is no maximum — larger systems simply have higher counts."
+            "There is no maximum - larger systems simply have higher counts."
         ], className="text-muted small"),
 
         html.Hr(),
@@ -377,8 +390,8 @@ def render_fpa_tab():
             "1. For each function type: ", html.Strong("Contribution"), " = Count × Complexity Weight (from Albrecht standard table)", html.Br(),
             "2. ", html.Strong("Unadjusted Function Points (UFP)"), " = Sum of all contributions (the raw project size)", html.Br(),
             "3. ", html.Strong("Total Degree of Influence (TDI)"), " = Sum of all 14 GSC ratings (range: 0–70)", html.Br(),
-            "4. ", html.Strong("Value Adjustment Factor (VAF)"), " = 0.65 + (0.01 × TDI)  — range: 0.65–1.35", html.Br(),
-            "5. ", html.Strong("Adjusted FP"), " = UFP × VAF — the final technology-independent project size"
+            "4. ", html.Strong("Value Adjustment Factor (VAF)"), " = 0.65 + (0.01 × TDI)  - range: 0.65–1.35", html.Br(),
+            "5. ", html.Strong("Adjusted FP"), " = UFP × VAF - the final technology-independent project size"
         ], className="small"),
         html.P([
             html.A("View 14 GSC definitions (PDF)", href="https://www.jodypaul.com/SWE/FunctionPointAnalysisFundamentals.pdf", target="_blank"),
@@ -400,7 +413,7 @@ def render_fpa_tab():
                     ])
                 ], bordered=True, size="sm"),
                 html.P([
-                    html.Strong("Why are Internal Logical Files heaviest?"), " Because databases require design, normalisation, indexing, migration, and ongoing maintenance — significantly more effort per unit than input forms.", html.Br(),
+                    html.Strong("Why are Internal Logical Files heaviest?"), " Because databases require design, normalisation, indexing, migration, and ongoing maintenance - significantly more effort per unit than input forms.", html.Br(),
                     html.Strong("Reference: "), "Albrecht, A.J. (1979) 'Measuring Application Development Productivity', IBM Applications Development Symposium."
                 ], className="small text-muted"),
             ], title="View Standard Weight Table (Albrecht, 1979)")
@@ -484,10 +497,10 @@ def calculate_fpa(n_clicks, complexities, counts, gsc_values):
 
 def render_cocomo_tab():
     return html.Div([
-        html.H4("COCOMO — Constructive Cost Model"),
+        html.H4("COCOMO - Constructive Cost Model"),
         html.Ul([
             html.Li([html.Strong("Definition: "), "An algorithmic software cost estimation model that predicts effort, cost, and schedule based on project size metrics (Boehm, 1981)."]),
-            html.Li([html.Strong("Use case: "), "When you have a size estimate (from FPA or KLOC) and need to forecast staffing, timeline, and budget — supporting resource allocation decisions."]),
+            html.Li([html.Strong("Use case: "), "When you have a size estimate (from FPA or KLOC) and need to forecast staffing, timeline, and budget - supporting resource allocation decisions."]),
         ], className="mb-3"),
         # Project Classification Table
         html.H5("Project Type Classification", style={"fontSize": "1.3rem", "fontWeight": "700"}),
@@ -497,7 +510,7 @@ def render_cocomo_tab():
                 html.Tr([html.Td(html.Strong("Project Size")), html.Td("2–50 KLOC"), html.Td("50–300 KLOC"), html.Td("300+ KLOC")]),
                 html.Tr([html.Td(html.Strong("Complexity")), html.Td("Low"), html.Td("Medium"), html.Td("High")]),
                 html.Tr([html.Td(html.Strong("Problem Understanding")), html.Td("Well-understood, previously solved"), html.Td("Somewhat understood, partial experience"), html.Td("High ambiguity, novel domain")]),
-                html.Tr([html.Td(html.Strong("Team Experience")), html.Td("Highly experienced team"), html.Td("Mixed — some experienced, some not"), html.Td("Specialised experts required")]),
+                html.Tr([html.Td(html.Strong("Team Experience")), html.Td("Highly experienced team"), html.Td("Mixed - some experienced, some not"), html.Td("Specialised experts required")]),
                 html.Tr([html.Td(html.Strong("Environment")), html.Td("Flexible, few constraints"), html.Td("Moderate constraints"), html.Td("Highly rigorous, strict operational constraints")]),
                 html.Tr([html.Td(html.Strong("Example")), html.Td("Simple payroll system"), html.Td("New system interfacing with legacy"), html.Td("Flight control software")]),
             ])
@@ -521,7 +534,7 @@ def render_cocomo_tab():
         html.P([
             html.Strong("How constants work: "), html.Br(),
             html.Strong("a"), " (effort multiplier): Higher for embedded projects → more effort per unit of code due to constraints.", html.Br(),
-            html.Strong("b"), " (effort exponent): >1 means effort grows faster than linearly with size — larger projects are disproportionately harder.", html.Br(),
+            html.Strong("b"), " (effort exponent): >1 means effort grows faster than linearly with size - larger projects are disproportionately harder.", html.Br(),
             html.Strong("c"), " (duration multiplier): Determines baseline calendar time.", html.Br(),
             html.Strong("d"), " (duration exponent): <1 means adding more effort doesn't proportionally reduce duration (Brooks's Law).",
         ], className="text-muted small"),
@@ -557,9 +570,9 @@ def render_cocomo_tab():
         dcc.Dropdown(
             id="cocomo-type",
             options=[
-                {"label": "Organic — Well-understood problem, experienced team, flexible environment (2–50 KLOC)", "value": "Organic"},
-                {"label": "Semi-Detached — Partially understood problem, mixed experience, moderate constraints (50–300 KLOC)", "value": "Semi-detached"},
-                {"label": "Embedded — Novel/complex domain, strict constraints, specialised experts required (300+ KLOC)", "value": "Embedded"},
+                {"label": "Organic - Well-understood problem, experienced team, flexible environment (2–50 KLOC)", "value": "Organic"},
+                {"label": "Semi-Detached - Partially understood problem, mixed experience, moderate constraints (50–300 KLOC)", "value": "Semi-detached"},
+                {"label": "Embedded - Novel/complex domain, strict constraints, specialised experts required (300+ KLOC)", "value": "Embedded"},
             ],
             value="Organic", clearable=False
         ),
@@ -668,18 +681,18 @@ def render_pert_tab():
         ], className="mb-2", id={"type": "pert-row", "index": i}, style={} if visible else {"display": "none"}))
 
     return html.Div([
-        html.H4("PERT — Three-Point Estimation"),
+        html.H4("PERT - Three-Point Estimation"),
         html.Ul([
             html.Li([html.Strong("Definition: "), "Quantifies estimation uncertainty by calculating a weighted average from three scenarios (Optimistic, Most Likely, Pessimistic), producing a confidence range rather than a single-point estimate."]),
-            html.Li([html.Strong("Use case: "), "When project conditions are uncertain or novel, and stakeholders need to understand the range of possible outcomes — enabling risk-aware planning and contingency justification."]),
+            html.Li([html.Strong("Use case: "), "When project conditions are uncertain or novel, and stakeholders need to understand the range of possible outcomes - enabling risk-aware planning and contingency justification."]),
         ], className="mb-3"),
 
         html.H5("Formulas", style={"fontSize": "1.3rem", "fontWeight": "700"}),
         html.P([
-            html.Strong("Expected (weighted mean)"), " = (O + 4M + P) / 6  — calculated per task", html.Br(),
-            html.Strong("Standard Deviation (σ)"), " = (P - O) / 6  — measures uncertainty per task", html.Br(),
+            html.Strong("Expected (weighted mean)"), " = (O + 4M + P) / 6  - calculated per task", html.Br(),
+            html.Strong("Standard Deviation (σ)"), " = (P - O) / 6  - measures uncertainty per task", html.Br(),
             html.Strong("Total Expected"), " = Sum of all task Expecteds", html.Br(),
-            html.Strong("Total σ"), " = √(σ₁² + σ₂² + σ₃² + ...)  — statistical combination of independent uncertainties",
+            html.Strong("Total σ"), " = √(σ₁² + σ₂² + σ₃² + ...)  - statistical combination of independent uncertainties",
         ], className="small"),
 
         # Explanation dropdown
@@ -689,7 +702,7 @@ def render_pert_tab():
                     html.Strong("Expected (E)"), " is the weighted mean duration for each task. "
                     "The formula weights the Most Likely estimate 4× more heavily than Optimistic or Pessimistic, "
                     "because most outcomes cluster around the middle scenario.", html.Br(), html.Br(),
-                    html.Strong("Standard Deviation (σ)"), " measures how spread out the estimate is — how uncertain you are. ", html.Br(),
+                    html.Strong("Standard Deviation (σ)"), " measures how spread out the estimate is - how uncertain you are. ", html.Br(),
                     "A task with O=3, M=4, P=5 has LOW uncertainty (σ = 0.33 weeks).", html.Br(),
                     "A task with O=2, M=4, P=12 has HIGH uncertainty (σ = 1.67 weeks).", html.Br(), html.Br(),
                     html.Strong("Why both?"), " Expected alone gives false precision. σ tells stakeholders the RANGE of likely outcomes.", html.Br(), html.Br(),
@@ -724,7 +737,7 @@ def render_pert_tab():
 
         html.H5("Enter Estimates Per Phase (in weeks)", style={"fontSize": "1.3rem", "fontWeight": "700"}),
         html.P([
-            "Tasks can be edited, added, or removed as needed — every project has different phases.", html.Br(),
+            "Tasks can be edited, added, or removed as needed - every project has different phases.", html.Br(),
             html.Strong("Rule: "), "P ≥ M ≥ O > 0 (Pessimistic must be ≥ Most Likely, which must be ≥ Optimistic. All must be positive.)"
         ], className="text-muted small"),
         dbc.Row([
@@ -794,7 +807,7 @@ def calculate_pert(n_clicks, names, o_vals, m_vals, p_vals, row_count):
     violations = []
     for t in tasks:
         if not (t["p"] >= t["m"] >= t["o"] > 0):
-            violations.append(f"⚠️ {t['name']}: O={t['o']}, M={t['m']}, P={t['p']} — violates rule P ≥ M ≥ O > 0")
+            violations.append(f"⚠️ {t['name']}: O={t['o']}, M={t['m']}, P={t['p']} - violates rule P ≥ M ≥ O > 0")
 
     if violations:
         warning = dbc.Alert([
@@ -861,7 +874,7 @@ def render_cost_tab():
         html.H4("Cost Contingency Calculator"),
         html.Ul([
             html.Li([html.Strong("Definition: "), "Translates effort estimates into monetary terms by factoring in team composition, role-specific daily rates, allocation percentages, and a contingency buffer for risk."]),
-            html.Li([html.Strong("Use case: "), "When you need a budget figure for project approval — accounting for the reality that different roles cost differently and that all estimates carry inherent uncertainty requiring contingency."]),
+            html.Li([html.Strong("Use case: "), "When you need a budget figure for project approval - accounting for the reality that different roles cost differently and that all estimates carry inherent uncertainty requiring contingency."]),
         ], className="mb-3"),
 
         # Contingency explanation dropdown
@@ -871,12 +884,12 @@ def render_cost_tab():
                     html.Strong("What is contingency?"), html.Br(),
                     "A percentage added to the base cost to account for estimation errors, scope changes, technical surprises, and resource risks.", html.Br(), html.Br(),
                     html.Strong("Industry standard guidance:"), html.Br(),
-                    "10% — Low risk: familiar project, experienced team, stable requirements.", html.Br(),
-                    "20% — Moderate risk: some novel elements, partially understood domain.", html.Br(),
-                    "30% — High risk: novel project, new team, unclear requirements, significant unknowns.", html.Br(), html.Br(),
+                    "10% - Low risk: familiar project, experienced team, stable requirements.", html.Br(),
+                    "20% - Moderate risk: some novel elements, partially understood domain.", html.Br(),
+                    "30% - High risk: novel project, new team, unclear requirements, significant unknowns.", html.Br(), html.Br(),
                     html.Strong("Why it matters:"), html.Br(),
                     "The QuickShop case study (Week 5) demonstrated that projects without contingency are guaranteed to overrun. ",
-                    "Contingency IS risk management in financial terms — it's how you respond to identified risks without needing to re-budget.", html.Br(), html.Br(),
+                    "Contingency IS risk management in financial terms - it's how you respond to identified risks without needing to re-budget.", html.Br(), html.Br(),
                     html.Strong("Professional practice:"), html.Br(),
                     "Every credible PM organisation (PMI, APM) recommends contingency. Not including it is considered unprofessional.", html.Br(),
                     html.A("PMI Practice Guide: Managing Change in Organizations", href="https://www.pmi.org/", target="_blank"), " | ",
@@ -886,17 +899,19 @@ def render_cost_tab():
         ], start_collapsed=True, className="mb-3"),
 
         html.H5("Team Composition", style={"fontSize": "1.3rem", "fontWeight": "700"}),
-        html.P("Roles can be edited — adjust names, rates, and allocation to match your project team.", className="text-muted small"),
+        dbc.Row([
+            dbc.Col(html.P("Roles can be edited - adjust names, rates, and allocation to match your project team.", className="text-muted small mb-0"), width=8),
+            dbc.Col([
+                dbc.Button("+ Add Role", id="cost-add-btn", color="secondary", size="sm", className="me-2"),
+                dbc.Button("- Remove Role", id="cost-remove-btn", color="secondary", size="sm"),
+            ], width=4, className="text-end"),
+        ], className="mb-2 align-items-center"),
         dbc.Row([
             dbc.Col(html.Strong("Role"), width=3),
             dbc.Col(html.Strong("Daily Rate (£)"), width=3),
             dbc.Col(html.Strong("% Allocation"), width=3),
         ], className="mb-2"),
         *role_rows,
-        dbc.Row([
-            dbc.Col(dbc.Button("+ Add Role", id="cost-add-btn", color="secondary", size="sm"), width=2),
-            dbc.Col(dbc.Button("- Remove Role", id="cost-remove-btn", color="secondary", size="sm"), width=2),
-        ], className="mb-3"),
 
         html.Hr(),
         html.H5("Duration & Contingency", style={"fontSize": "1.3rem", "fontWeight": "700"}),
@@ -1038,12 +1053,12 @@ def generate_summary(n_clicks, fpa_data, cocomo_data, pert_data, cost_data):
         dbc.CardBody([
             html.H5("Executive Summary"),
             html.Table([
-                html.Tr([html.Td(html.Strong("Size (FPA)")), html.Td(f"{fpa_data['adjusted_fp']} Function Points" if fpa_data else "—")]),
-                html.Tr([html.Td(html.Strong("Effort (COCOMO)")), html.Td(f"{cocomo_data['effort']} person-months" if cocomo_data else "—")]),
-                html.Tr([html.Td(html.Strong("Duration (COCOMO)")), html.Td(f"{cocomo_data['duration']} months" if cocomo_data else "—")]),
-                html.Tr([html.Td(html.Strong("Team Size (COCOMO)")), html.Td(f"~{int(round(cocomo_data['team_size']))} people" if cocomo_data else "—")]),
-                html.Tr([html.Td(html.Strong("Confidence (PERT)")), html.Td(f"{pert_data['total_expected']} weeks ± {pert_data['total_sigma']} weeks" if pert_data else "—")]),
-                html.Tr([html.Td(html.Strong("Total Cost")), html.Td(f"£{cost_data['total_cost']:,.0f} (incl. {cost_data['contingency_pct']}% contingency)" if cost_data else "—")]),
+                html.Tr([html.Td(html.Strong("Size (FPA)")), html.Td(f"{fpa_data['adjusted_fp']} Function Points" if fpa_data else "-")]),
+                html.Tr([html.Td(html.Strong("Effort (COCOMO)")), html.Td(f"{cocomo_data['effort']} person-months" if cocomo_data else "-")]),
+                html.Tr([html.Td(html.Strong("Duration (COCOMO)")), html.Td(f"{cocomo_data['duration']} months" if cocomo_data else "-")]),
+                html.Tr([html.Td(html.Strong("Team Size (COCOMO)")), html.Td(f"~{int(round(cocomo_data['team_size']))} people" if cocomo_data else "-")]),
+                html.Tr([html.Td(html.Strong("Confidence (PERT)")), html.Td(f"{pert_data['total_expected']} weeks ± {pert_data['total_sigma']} weeks" if pert_data else "-")]),
+                html.Tr([html.Td(html.Strong("Total Cost")), html.Td(f"£{cost_data['total_cost']:,.0f} (incl. {cost_data['contingency_pct']}% contingency)" if cost_data else "-")]),
             ], className="table"),
             html.Hr(),
             html.P([
