@@ -361,9 +361,7 @@ def render_fpa_tab():
         html.P([
             html.Strong("Weight"), " is a fixed value from the Albrecht standard weight table - NOT user-entered. ", html.Br(),
             "The app automatically looks up the correct weight based on your Function Type + Complexity selection. ",
-            "These weights represent relative development effort derived from empirical research across hundreds of IBM projects (Albrecht, 1979). ",
-            html.A("View original source (IFPUG)", href="https://www.ifpug.org/standards/fpa/", target="_blank"),
-            " | ",
+            "These weights represent relative development effort derived from empirical research across hundreds of IBM projects by Albrecht in 1979. ",
             html.A("QSM Function Point reference", href="https://www.qsm.com/resources/function-point-languages-table", target="_blank"),
         ], className="text-muted small"),
 
